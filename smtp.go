@@ -25,7 +25,7 @@ type Config struct {
 	}
 }
 
-// SendMail - send HTML email via SMTP
+// Send - send HTML email via SMTP
 func (c *Config) Send() error {
 
 	header := make(map[string]string)
@@ -45,13 +45,13 @@ func (c *Config) Send() error {
 	}
 
 	// add message body
-	message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(c.Request.Body))
+	message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(c.Headers.Body))
 
 	return smtp.SendMail(
 		net.JoinHostPort(c.SMTP.Server, strconv.Itoa(c.SMTP.Port)),
 		smtp.PlainAuth("", c.SMTP.Email, c.SMTP.Password, c.SMTP.Server),
 		c.SMTP.Email,
-		[]string{c.Request.To},
+		[]string{c.Headers.To},
 		[]byte(message))
 
 }

@@ -15,7 +15,9 @@ type Config struct {
 		To      string
 		ReplyTo string
 		Subject string
-		Body    string
+	}
+	Body struct {
+		Message string
 	}
 	SMTP struct {
 		Server   string
@@ -33,7 +35,9 @@ func (c *Config) Send() error {
 	header["From"] = c.Headers.From
 	header["To"] = c.Headers.To
 	header["Subject"] = c.Headers.Subject
-	header["Reply-To"] = c.Headers.ReplyTo
+	if len(c.Headers.ReplyTo) > 0 {
+		header["Reply-To"] = c.Headers.ReplyTo
+	}
 	header["MIME-Version"] = "1.0"
 	header["Content-Type"] = "text/html; charset=\"utf-8\""
 	header["Content-Transfer-Encoding"] = "base64"
@@ -44,8 +48,8 @@ func (c *Config) Send() error {
 		message += fmt.Sprintf("%s: %s\r\n", k, v)
 	}
 
-	// add message body
-	message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(c.Headers.Body))
+	// add base64 encoded message body
+	message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(c.Body.Message))
 
 	return smtp.SendMail(
 		net.JoinHostPort(c.SMTP.Server, strconv.Itoa(c.SMTP.Port)),

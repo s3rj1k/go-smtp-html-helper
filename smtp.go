@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/smtp"
 	"strconv"
-	"strings"
 )
 
 // Config - SMTP config
@@ -16,8 +15,6 @@ type Config struct {
 		To      string
 		ReplyTo string
 		Subject string
-		Cc      []string
-		Bcc     []string
 		IsText  bool
 	}
 	Body struct {
@@ -49,12 +46,6 @@ func (c *Config) Send() error {
 		header["Content-Type"] = "text/html; charset=\"utf-8\""
 	}
 	header["Content-Transfer-Encoding"] = "base64"
-	if len(c.Headers.Cc) > 0 {
-		header["cc"] = strings.Join(c.Headers.Cc, ", ")
-	}
-	if len(c.Headers.Bcc) > 0 {
-		header["bcc"] = strings.Join(c.Headers.Bcc, ", ")
-	}
 
 	message := ""
 	// assemble headers

@@ -11,21 +11,21 @@ import (
 // Config - SMTP config
 type Config struct {
 	Headers struct {
-		From    string
-		To      string
-		ReplyTo string
-		Subject string
-		IsText  bool
-	}
+		From    string `json:"From" yaml:"From"`
+		To      string `json:"To" yaml:"To"`
+		ReplyTo string `json:"ReplyTo" yaml:"ReplyTo"`
+		Subject string `json:"Subject" yaml:"Subject"`
+		IsText  bool   `json:"IsText" yaml:"IsText"`
+	} `json:"Headers" yaml:"Headers"`
 	Body struct {
-		Message string
-	}
+		Message string `json:"-" yaml:"-"`
+	} `json:"-" yaml:"-"`
 	SMTP struct {
-		Server   string
-		Port     int
-		Email    string
-		Password string
-	}
+		Server   string `json:"Server" yaml:"Server"`
+		Port     int    `json:"Port" yaml:"Port"`
+		Email    string `json:"Email" yaml:"Email"`
+		Password string `json:"Password" yaml:"Password"`
+	} `json:"SMTP" yaml:"SMTP"`
 }
 
 // Send - send HTML email via SMTP

@@ -5,10 +5,6 @@ run:
 linters-settings:
   errcheck:
     check-type-assertions: true
-  goimports:
-    # put imports beginning with prefix after 3rd-party packages;
-    # it's a comma-separated list of prefixes
-    local-prefixes: github.com/s3rj1k/jrpc2
   govet:
     check-shadowing: true
   gocyclo:
@@ -17,7 +13,7 @@ linters-settings:
     suggest-new: true
   depguard:
     list-type: blacklist
-    include-go-root: false
+    include-go-root: true
     packages:
       - github.com/davecgh/go-spew/spew
   misspell:

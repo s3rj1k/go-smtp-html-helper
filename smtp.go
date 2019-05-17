@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-// Config - SMTP config
+// Config - SMTP config.
 type Config struct {
 	Headers struct {
 		From    string `json:"From" yaml:"From"`
@@ -28,10 +28,10 @@ type Config struct {
 	} `json:"SMTP" yaml:"SMTP"`
 }
 
-// Send - send HTML email via SMTP
+// Send - send HTML email via SMTP.
 func (c *Config) Send() error {
-
 	header := make(map[string]string)
+
 	// prepare headers map
 	header["From"] = c.Headers.From
 	header["To"] = c.Headers.To
@@ -47,7 +47,7 @@ func (c *Config) Send() error {
 	}
 	header["Content-Transfer-Encoding"] = "base64"
 
-	message := ""
+	var message string
 	// assemble headers
 	for k, v := range header {
 		message += fmt.Sprintf("%s: %s\r\n", k, v)
@@ -57,10 +57,18 @@ func (c *Config) Send() error {
 	message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(c.Body.Message))
 
 	return smtp.SendMail(
-		net.JoinHostPort(c.SMTP.Server, strconv.Itoa(c.SMTP.Port)),
-		smtp.PlainAuth("", c.SMTP.Email, c.SMTP.Password, c.SMTP.Server),
+		net.JoinHostPort(
+			c.SMTP.Server,
+			strconv.Itoa(c.SMTP.Port),
+		),
+		smtp.PlainAuth(
+			"",
+			c.SMTP.Email,
+			c.SMTP.Password,
+			c.SMTP.Server,
+		),
 		c.SMTP.Email,
 		[]string{c.Headers.To},
-		[]byte(message))
-
+		[]byte(message),
+	)
 }

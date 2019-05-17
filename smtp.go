@@ -8,53 +8,61 @@ import (
 	"strconv"
 )
 
-// Config - SMTP config.
+// header describes single SMTP header.
+type header struct {
+	Name  string
+	Value string
+}
+
+// getHeaders creates headers string.
+func getHeaders(headers ...header) (out string) {
+	for _, header := range headers {
+		if len(header.Value) == 0 || len(header.Name) == 0 {
+			continue
+		}
+		out += fmt.Sprintf(
+			"%s: %s\r\n",
+			header.Name,
+			header.Value,
+		)
+	}
+
+	return out + "\r\n"
+}
+
+// Config describes SMTP config.
 type Config struct {
+	SMTP struct {
+		Server   string `json:"Server" yaml:"Server"`
+		Port     int    `json:"Port" yaml:"Port"`
+		Address  string `json:"Address" yaml:"Address"`
+		Password string `json:"Password" yaml:"Password"`
+	} `json:"SMTP" yaml:"SMTP"`
 	Headers struct {
 		From    string `json:"From" yaml:"From"`
 		To      string `json:"To" yaml:"To"`
-		ReplyTo string `json:"ReplyTo" yaml:"ReplyTo"`
 		Subject string `json:"Subject" yaml:"Subject"`
-		IsText  bool   `json:"IsText" yaml:"IsText"`
+		ReplyTo string `json:"ReplyTo" yaml:"ReplyTo"`
 	} `json:"Headers" yaml:"Headers"`
 	Body struct {
 		Message string `json:"-" yaml:"-"`
 	} `json:"-" yaml:"-"`
-	SMTP struct {
-		Server   string `json:"Server" yaml:"Server"`
-		Port     int    `json:"Port" yaml:"Port"`
-		Email    string `json:"Email" yaml:"Email"`
-		Password string `json:"Password" yaml:"Password"`
-	} `json:"SMTP" yaml:"SMTP"`
 }
 
-// Send - send HTML email via SMTP.
-func (c *Config) Send() error {
-	header := make(map[string]string)
+// SendHTML sends HTML email via SMTP.
+func (c *Config) SendHTML() error {
+	headers := getHeaders(
+		header{"From", c.Headers.From},
+		header{"To", c.Headers.To},
+		header{"Subject", c.Headers.To},
+		header{"Reply-To", c.Headers.ReplyTo},
+		header{"MIME-Version", "1.0"},
+		header{"Content-Type", `text/html; charset="utf-8"`},
+		header{"Content-Transfer-Encoding", "base64"},
+	)
 
-	// prepare headers map
-	header["From"] = c.Headers.From
-	header["To"] = c.Headers.To
-	header["Subject"] = c.Headers.Subject
-	if len(c.Headers.ReplyTo) > 0 {
-		header["Reply-To"] = c.Headers.ReplyTo
-	}
-	header["MIME-Version"] = "1.0"
-	if c.Headers.IsText {
-		header["Content-Type"] = "text/plain; charset=\"utf-8\""
-	} else {
-		header["Content-Type"] = "text/html; charset=\"utf-8\""
-	}
-	header["Content-Transfer-Encoding"] = "base64"
-
-	var message string
-	// assemble headers
-	for k, v := range header {
-		message += fmt.Sprintf("%s: %s\r\n", k, v)
-	}
-
-	// add base64 encoded message body
-	message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(c.Body.Message))
+	// assamble message body
+	body := headers + base64.StdEncoding.EncodeToString([]byte(c.Body.Message))
 
 	return smtp.SendMail(
 		net.JoinHostPort(
@@ -63,12 +71,44 @@ func (c *Config) Send() error {
 		),
 		smtp.PlainAuth(
 			"",
-			c.SMTP.Email,
+			c.SMTP.Address,
 			c.SMTP.Password,
 			c.SMTP.Server,
 		),
-		c.SMTP.Email,
+		c.SMTP.Address,
 		[]string{c.Headers.To},
-		[]byte(message),
+		[]byte(body),
+	)
+}
+
+// SendText sends text email via SMTP.
+func (c *Config) SendText() error {
+	headers := getHeaders(
+		header{"From", c.Headers.From},
+		header{"To", c.Headers.To},
+		header{"Subject", c.Headers.To},
+		header{"Reply-To", c.Headers.ReplyTo},
+		header{"MIME-Version", "1.0"},
+		header{"Content-Type", `text/plain; charset="utf-8"`},
+		header{"Content-Transfer-Encoding", "base64"},
+	)
+
+	// assamble message body
+	body := headers + base64.StdEncoding.EncodeToString([]byte(c.Body.Message))
+
+	return smtp.SendMail(
+		net.JoinHostPort(
+			c.SMTP.Server,
+			strconv.Itoa(c.SMTP.Port),
+		),
+		smtp.PlainAuth(
+			"",
+			c.SMTP.Address,
+			c.SMTP.Password,
+			c.SMTP.Server,
+		),
+		c.SMTP.Address,
+		[]string{c.Headers.To},
+		[]byte(body),
 	)
 }

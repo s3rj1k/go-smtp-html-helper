@@ -30,23 +30,27 @@ func getHeaders(headers ...header) (out string) {
 	return out + "\r\n"
 }
 
+// HeadersConfig describes headers configuration.
+type HeadersConfig struct {
+	From    string `json:"From" yaml:"From"`
+	To      string `json:"To" yaml:"To"`
+	Subject string `json:"Subject" yaml:"Subject"`
+	ReplyTo string `json:"ReplyTo" yaml:"ReplyTo"`
+}
+
+// SMTPConfig describes SMTP configuration.
+type SMTPConfig struct {
+	Server   string `json:"Server" yaml:"Server"`
+	Port     int    `json:"Port" yaml:"Port"`
+	Address  string `json:"Address" yaml:"Address"`
+	Password string `json:"Password" yaml:"Password"`
+}
+
 // Config describes SMTP config.
 type Config struct {
-	SMTP struct {
-		Server   string `json:"Server" yaml:"Server"`
-		Port     int    `json:"Port" yaml:"Port"`
-		Address  string `json:"Address" yaml:"Address"`
-		Password string `json:"Password" yaml:"Password"`
-	} `json:"SMTP" yaml:"SMTP"`
-	Headers struct {
-		From    string `json:"From" yaml:"From"`
-		To      string `json:"To" yaml:"To"`
-		Subject string `json:"Subject" yaml:"Subject"`
-		ReplyTo string `json:"ReplyTo" yaml:"ReplyTo"`
-	} `json:"Headers" yaml:"Headers"`
-	Body struct {
-		Message string `json:"-" yaml:"-"`
-	} `json:"-" yaml:"-"`
+	SMTP    SMTPConfig    `json:"SMTP" yaml:"SMTP"`
+	Headers HeadersConfig `json:"Headers" yaml:"Headers"`
+	Body    string        `json:"-" yaml:"-"`
 }
 
 // SendHTML sends HTML email via SMTP.
@@ -62,7 +66,7 @@ func (c *Config) SendHTML() error {
 	)
 
 	// assamble message body
-	body := headers + base64.StdEncoding.EncodeToString([]byte(c.Body.Message))
+	body := headers + base64.StdEncoding.EncodeToString([]byte(c.Body))
 
 	return smtp.SendMail(
 		net.JoinHostPort(
@@ -94,7 +98,7 @@ func (c *Config) SendText() error {
 	)
 
 	// assamble message body
-	body := headers + base64.StdEncoding.EncodeToString([]byte(c.Body.Message))
+	body := headers + base64.StdEncoding.EncodeToString([]byte(c.Body))
 
 	return smtp.SendMail(
 		net.JoinHostPort(

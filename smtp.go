@@ -33,9 +33,9 @@ func getHeaders(headers ...header) (out string) {
 // HeadersConfig describes headers configuration.
 type HeadersConfig struct {
 	From    string `json:"From" yaml:"From"`
-	To      string `json:"To" yaml:"To"`
+	To      string `json:"To,omitempty" yaml:"To,omitempty"`
 	Subject string `json:"Subject" yaml:"Subject"`
-	ReplyTo string `json:"ReplyTo" yaml:"ReplyTo"`
+	ReplyTo string `json:"ReplyTo,omitempty" yaml:"ReplyTo,omitempty"`
 }
 
 // SMTPConfig describes SMTP configuration.

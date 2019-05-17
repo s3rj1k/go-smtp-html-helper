@@ -58,7 +58,7 @@ func (c *Config) SendHTML() error {
 	headers := getHeaders(
 		header{"From", c.Headers.From},
 		header{"To", c.Headers.To},
-		header{"Subject", c.Headers.To},
+		header{"Subject", c.Headers.Subject},
 		header{"Reply-To", c.Headers.ReplyTo},
 		header{"MIME-Version", "1.0"},
 		header{"Content-Type", `text/html; charset="utf-8"`},
@@ -90,7 +90,7 @@ func (c *Config) SendText() error {
 	headers := getHeaders(
 		header{"From", c.Headers.From},
 		header{"To", c.Headers.To},
-		header{"Subject", c.Headers.To},
+		header{"Subject", c.Headers.Subject},
 		header{"Reply-To", c.Headers.ReplyTo},
 		header{"MIME-Version", "1.0"},
 		header{"Content-Type", `text/plain; charset="utf-8"`},
